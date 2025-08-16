@@ -1,288 +1,215 @@
-[![Actions Status](https://github.com/raku-community-modules/Test-Output/workflows/test/badge.svg)](https://github.com/raku-community-modules/Test-Output/actions)
+[![Actions Status](https://github.com/lizmat/Test-Output/actions/workflows/linux.yml/badge.svg)](https://github.com/lizmat/Test-Output/actions) [![Actions Status](https://github.com/lizmat/Test-Output/actions/workflows/macos.yml/badge.svg)](https://github.com/lizmat/Test-Output/actions) [![Actions Status](https://github.com/lizmat/Test-Output/actions/workflows/windows.yml/badge.svg)](https://github.com/lizmat/Test-Output/actions)
 
-Test::Output - Test the output to STDOUT and STDERR your program generates
+NAME
+====
 
-# TABLE OF CONTENTS
+Test::Output - Test the output to STDOUT and STDERR your tests produce
 
-- [NAME](#name)
-- [SYNOPSIS](#synopsis)
-- [DESCRIPTION](#description)
-- [EXPORTED SUBROUTINES](#exported-subroutines)
-    - [`is` Tests](#is-tests)
-        - [`output-is`](#output-is)
-        - [`stdout-is`](#stdout-is)
-        - [`stderr-is`](#stderr-is)
-    - [`like` Tests](#like-tests)
-        - [`output-like`](#output-like)
-        - [`stdout-like`](#stdout-like)
-        - [`stderr-like`](#stderr-like)
-    - [Output Capture](#output-capture)
-        - [`output-from`](#output-from)
-        - [`stdout-from`](#stdout-from)
-        - [`stderr-from`](#stderr-from)
-- [REPOSITORY](#repository)
-- [BUGS](#bugs)
-- [AUTHOR](#author)
-- [LICENSE](#license)
-
-# SYNOPSIS
+SYNOPSIS
+========
 
 ```raku
-    use v6.d;
-    use Test;
-    use Test::Output;
+use Test::Output;
 
-    my &test-code = sub {
-        say 42;
-        note 'warning!';
-        say "After warning";
-    };
+my &test-code = sub {
+    say 42;
+    note 'warning!';
+    say "After warning";
+};
 
-    # Test code's output using exact match ('is')
-    output-is   &test-code, "42\nwarning!\nAfter warning\n", 'testing output';
-    stdout-is   &test-code, "42\nAfter warning\n",  'testing stdout';
-    stderr-is   &test-code, "warning!\n", 'testing stderr';
+# Test code's output using exact match ('is')
+output-is   &test-code, "42\nwarning!\nAfter warning\n", 'testing output';
+stdout-is   &test-code, "42\nAfter warning\n",  'testing stdout';
+stderr-is   &test-code, "warning!\n", 'testing stderr';
 
-    # Test code's output using regex ('like')
-    output-like &test-code, /42.+warning.+After/, 'testing output (regex)';
-    stdout-like &test-code, /42/, 'testing stdout (regex)';
-    stderr-like &test-code, /^ "warning!\n" $/, 'testing stderr (regex)';
+# Test code's output using regex ('like')
+output-like &test-code, /42.+warning.+After/, 'testing output (regex)';
+stdout-like &test-code, /42/, 'testing stdout (regex)';
+stderr-like &test-code, /^ "warning!\n" $/, 'testing stderr (regex)';
 
-    # Just capture code's output and do whatever you want with it
-    is output-from( &test-code ), "42\nwarning!\nAfter warning\n";
-    is stdout-from( &test-code ), "42\nAfter warning\n";
-    is stderr-from( &test-code ), "warning!\n";
+# Test code's silentness
+no-output { my $a = 42 }, 'did not generate any output';
+no-stdout { my $a = 42 }, 'did not generate any output on STDOUT';
+no-stderr { my $a = 42 }, 'did not generate any output on STDERR';
 
+# Just capture code's output and do whatever you want with it
+is output-from( &test-code ), "42\nwarning!\nAfter warning\n";
+is stdout-from( &test-code ), "42\nAfter warning\n";
+is stderr-from( &test-code ), "warning!\n";
 ```
 
-# DESCRIPTION
+DESCRIPTION
+===========
 
-This module allows you to capture the output (STDOUT/STDERR/BOTH) of a
-piece of code and evaluate it for some criteria. It needs version 6.d
-of the language, since it's following specs that were deployed for
-that version. If you need to go with 6.c, download 1.001001
-from
-[here](https://github.com/raku-community-modules/Test-Output/releases) or
-via  `git clone`+
+The `Test::Output` distribution provides a number of test subroutines that allow one to capture the output (STDOUT / STDERR / or both) of the execution of a `Callable` and evaluate that output for some criteria.
 
-    git checkout v1.001001
-    zef install .
+SELECTIVE IMPORTING
+===================
 
-# EXPORTED SUBROUTINES
-
-## `is` Tests
-
-### `output-is`
-
-![][sub-signature]
 ```raku
-    sub output-is (&code, Str $expected, Str $desc? );
+use Test::Output <output-is>;  # only import "output-is"
 ```
 
-![][sub-usage-example]
+By default all functions are exported. But you can limit this to the functions you actually need by specifying the names in the `use` statement.
+
+To prevent name collisions and/or import any subroutine with a more memorable name, one can use the "original-name:known-as" syntax. A semi-colon in a specified string indicates the name by which the subroutine is known in this distribution, followed by the name with which it will be known in the lexical context in which the `use` command is executed.
+
 ```raku
-    output-is { say 42; note 43; say 44 }, "42\n43\n44\n",
-        'Merged output from STDOUT/STDERR looks fine!';
+use Test::Output <output-is:ois>;  # import "output-is" as "oisp"
+ois { say "foo" }, "foo\n", 'output matched';
 ```
 
-Uses `is` function from `Test` module to test whether the combined
-STDERR/STDOUT output from a piece of code matches the given string. Takes
-an **optional** test description.
+EXPORTED SUBROUTINES
+====================
 
-----
+"is" tests
+----------
 
-### `stdout-is`
+### output-is
 
-![][sub-signature]
 ```raku
-    sub stdout-is (&code, Str $expected, Str $desc? );
+output-is { say 42; note 43; say 44 }, "42\n43\n44\n",
+ 'Merged output from STDOUT/STDERR looks fine!';
 ```
 
-![][sub-usage-example]
+Uses `is` function from `Test` module to test whether the combined STDERR/STDOUT output from the execution of a `Callable` matches the given string. Takes an **optional** test description.
+
+### stdout-is
+
 ```raku
-    stdout-is { say 42; note 43; say 44 }, "42\n44\n", 'STDOUT looks fine!';
+stdout-is { say 42; note 43; say 44 }, "42\n44\n",
+  'STDOUT looks fine!';
 ```
 
-Same as [`output-is`](#output-is), except tests STDOUT only.
+Same as `output-is`, except tests STDOUT only.
 
-----
+### stderr-is
 
-### `stderr-is`
-
-![][sub-signature]
 ```raku
-    sub stderr-is (&code, Str $expected, Str $desc? );
+stderr-is { say 42; note 43; say 44 }, "43\n",
+  'STDERR looks fine!';
 ```
 
-![][sub-usage-example]
+Same as `output-is`, except tests STDERR only.
+
+"like" tests
+------------
+
+### output-like
+
 ```raku
-    stderr-is { say 42; note 43; say 44 }, "43\n", 'STDERR looks fine!';
+output-like { say 42; note 43; say 44 }, /42 .+ 43 .+ 44/,
+  'Merged output from STDOUT/STDERR matches the regex!';
 ```
 
-Same as [`output-is`](#output-is), except tests STDERR only.
+Uses `like` function from `Test` module to test whether the combined STDERR / STDOUT output from the execution of a `Callable` matches the given `Regex`. Takes an **optional** test description.
 
-----
+### stdout-like
 
-## `like` Tests
-
-### `output-like`
-
-![][sub-signature]
 ```raku
-    sub output-like (&code, Regex $expected, Str $desc? );
+stdout-like { say 42; note 43; say 44 }, /42 \n 44/,
+  'STDOUT matches the regex!';
 ```
 
-![][sub-usage-example]
+Same as `output-like`, except tests STDOUT only.
+
+### stderr-like
+
 ```raku
-    output-like { say 42; note 43; say 44 }, /42 .+ 43 .+ 44/,
-        'Merged output from STDOUT/STDERR matches the regex!';
+stderr-like { say 42; note 43; say 44 }, /^ 43\n $/,
+  'STDERR matches the regex!';
 ```
 
-Uses `like` function from `Test` module to test whether the combined
-STDERR/STDOUT output from a piece of code matches the given `Regex`. Takes
-an **optional** test description.
+Same as `output-like`, except tests STDERR only.
 
-----
+Output Capture
+--------------
 
-### `stdout-like`
+### output-from
 
-![][sub-signature]
 ```raku
-    sub stdout-like (&code, Regex $expected, Str $desc? );
+my $output = output-from { say 42; note 43; say 44 };
+say "Captured $output from our program!";
+
+is $output, "42\nwarning!\nAfter warning\n",
+  'captured merged STDOUT/STDERR look fine';
 ```
 
-![][sub-usage-example]
+Captures and returns merged STDOUT / STDERR output from the execution of a given `Callable`.
+
+### stdout-from
+
 ```raku
-    stdout-like { say 42; note 43; say 44 }, /42 \n 44/,
-        'STDOUT matches the regex!';
+my $stdout = stdout-from { say 42; note 43; say 44 };
+say "Captured $stdout from our program!";
+
+is $stdout, "42\nAfter warning\n",
+  'captured STDOUT looks fine';
 ```
 
-Same as [`output-like`](#output-like), except tests STDOUT only.
+Same as `output-from`, except captures STDOUT only.
 
-----
+### stderr-from
 
-### `stderr-like`
-
-![][sub-signature]
 ```raku
-    sub stderr-like (&code, Regex $expected, Str $desc? );
+my $stderr = stderr-from { say 42; note 43; say 44 };
+say "Captured $stderr from our program!";
+
+is $stderr, "warning\n",
+  'captured STDERR looks fine';
 ```
 
-![][sub-usage-example]
-```raku
-    stderr-like { say 42; note 43; say 44 }, /^ 43\n $/,
-        'STDERR matches the regex!';
-```
+Same as <output-from>, except captures STDERR only.
 
-Same as [`output-like`](#output-like), except tests STDERR only.
+### test-output-verbosity
 
-----
-
-## Output Capture
-
-### `output-from`
-
-![][sub-signature]
-```raku
-    sub output-from (&code) returns Str;
-```
-
-![][sub-usage-example]
-```raku
-    my $output = output-from { say 42; note 43; say 44 };
-    say "Captured $output from our program!";
-
-    is $output, "42\nwarning!\nAfter warning\n",
-        'captured merged STDOUT/STDERR look fine';
-```
-
-Captures and returns merged STDOUT/STDERR output from the given piece of code.
-
-----
-
-### `stdout-from`
-
-![][sub-signature]
-```raku
-    sub stdout-from (&code) returns Str;
-```
-
-![][sub-usage-example]
-```raku
-    my $stdout = stdout-from { say 42; note 43; say 44 };
-    say "Captured $stdout from our program!";
-
-    is $stdout, "42\nAfter warning\n", 'captured STDOUT looks fine';
-```
-
-Same as [`output-from`](#output-from), except captures STDOUT only.
-
-----
-
-### `stderr-from`
-
-![][sub-signature]
-```raku
-    sub stderr-from (&code) returns Str;
-```
-
-![][sub-usage-example]
-```raku
-    my $stderr = stderr-from { say 42; note 43; say 44 };
-    say "Captured $stderr from our program!";
-
-    is $stderr, "warning\n", 'captured STDERR looks fine';
-```
-
-Same as [`output-from`](#output-from), except captures STDERR only.
-
-----
-
-### `test-output-verbosity`
-
-![][sub-signature]
 ```raku
     sub test-output-verbosity (Bool :$on, Bool :$off) returns Str;
 ```
 
-![][sub-usage-example]
 ```raku
-    # turn verbosity on
-    test-output-verbosity(:on);
-    
-    my $output = output-from { do-something-interactive() };
-    # test output will now displayed during the test
-    
-    # turn verbosity off
-    test-output-verbosity(:off);
+# turn verbosity on
+test-output-verbosity(:on);
+
+my $output = output-from { do-something-interactive() };
+# test output will now displayed during the test
+
+# turn verbosity off
+test-output-verbosity(:off);
 ```
 
-Display the code's output while the test code is executed. This can be
-very useful for author tests that require you to enter input based on
-the output.
+Display the code's output while the test code is executed. This can be very useful for author tests that require you to enter input based on the output.
 
-----
+You can switch verbosity on or off with the <:on> and <:off> named arguments.
 
-# REPOSITORY
+CAVEATS
+=======
 
-Fork this module on GitHub:
-https://github.com/raku-community-modules/Test-Output
+The `Test::Output` logic operates by changing the dynamic variables `$*OUT` and `$*ERR`, which is what Raku's standard output functions use. This logic does **not** apply to any output generated by external programs using `run` or `shell`: they have their own way of capturing output.
 
-# BUGS
+AUTHORS
+=======
 
-To report bugs or request features, please use
-https://github.com/raku-community-modules/Test-Output/issues
+  * Zoffix Znet
 
-# ORIGINAL AUTHOR
+  * JJ Merelo
 
-Zoffix Znet (http://zoffix.com/)
+  * Elizabeth Mattijsen
 
-# LICENSE
+Source can be located at: https://github.com/lizmat/Test-Output . Comments and Pull Requests are welcome.
 
-You can use and distribute this module under the terms of the
-The Artistic License 2.0. See the `LICENSE` file included in this
-distribution for complete details.
+If you like this module, or what I’m doing more generally, committing to a [small sponsorship](https://github.com/sponsors/lizmat/) would mean a great deal to me!
 
-[sub-signature]: _chromatin/sub-signature.png
+COPYRIGHT AND LICENSE
+=====================
 
-[sub-usage-example]: _chromatin/sub-usage-example.png
+Copyright 2016 - 2017 Zoffix Znet
+
+Copyright 2019 - 2022 JJ Merelo
+
+Copyright 2023 - 2024 The Raku Community
+
+Copyright 2025 Elizabeth Mattijsen
+
+This library is free software; you can redistribute it and/or modify it under the Artistic License 2.0.
+

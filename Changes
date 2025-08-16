@@ -1,6 +1,8 @@
 Revision History for 'Test::Output' Raku Distribution
 
 {{$NEXT}}
+
+1.2  2025-08-16T11:24:04+02:00
     - Distribution adopted by Elizabeth Mattijsen
     - Complete re-implementation based on the Trap module
     - Add "no-output", "no-stdout" and "no-stderr" subroutines
