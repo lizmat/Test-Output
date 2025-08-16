@@ -89,6 +89,6 @@ my sub EXPORT(*@names) {
 
 #- hack ------------------------------------------------------------------------
 # To allow version fetching in test files
-unit module Test::Output:ver<1.2>:auth<zef:raku-community-modules>;
+unit module Test::Output:ver<1.2>:auth<zef:lizmat>;
 
 # vim: expandtab shiftwidth=4
