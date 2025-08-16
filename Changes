@@ -2,6 +2,9 @@ Revision History for 'Test::Output' Raku Distribution
 
 {{$NEXT}}
 
+1.3  2025-08-16T11:52:57+02:00
+    - Fix incorrect :auth on module definition
+
 1.2  2025-08-16T11:24:04+02:00
     - Distribution adopted by Elizabeth Mattijsen
     - Complete re-implementation based on the Trap module

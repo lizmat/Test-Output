@@ -4,7 +4,7 @@
   "specVersion": "1.6",
   "version": 1,
   "metadata": {
-    "timestamp": "2025-08-16T09:19:08+00:00",
+    "timestamp": "2025-08-16T09:53:04+00:00",
     "lifecycles": [
       {
         "phase": "pre-build"
@@ -27,7 +27,7 @@
     "component": {
       "type": "library",
       "mime-type": "text/plain",
-      "bom-ref": "pkg:raku/zef:lizmat/Test::Output@1.2",
+      "bom-ref": "pkg:raku/zef:lizmat/Test::Output@1.3",
       "authors": [
         {
           "bom-ref": "ZoffixZnet",
@@ -45,7 +45,7 @@
       "publisher": "zef",
       "group": "zef:lizmat",
       "name": "Test::Output",
-      "version": "1.2",
+      "version": "1.3",
       "description": "Test the output to STDOUT and STDERR your tests produce",
       "scope": "required",
       "licenses": [
@@ -57,14 +57,14 @@
           }
         }
       ],
-      "purl": "pkg:raku/zef:lizmat/Test::Output@1.2",
+      "purl": "pkg:raku/zef:lizmat/Test::Output@1.3",
       "externalReferences": [
         {
           "url": "git://github.com/raku-community-modules/Test-Output",
           "type": "distribution"
         },
         {
-          "url": "https://raku.land/zef:lizmat/Test::Output?v=1.2",
+          "url": "https://raku.land/zef:lizmat/Test::Output?v=1.3",
           "type": "documentation"
         },
         {
@@ -308,7 +308,7 @@
       "type": "distribution"
     },
     {
-      "url": "https://raku.land/zef:lizmat/Test::Output?v=1.2",
+      "url": "https://raku.land/zef:lizmat/Test::Output?v=1.3",
       "type": "documentation"
     },
     {
