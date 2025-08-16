@@ -1,0 +1,229 @@
+=begin pod
+
+=head1 NAME
+
+Test::Output - Test the output to STDOUT and STDERR your tests produce
+
+=head1 SYNOPSIS
+
+=begin code :lang<raku>
+use Test::Output;
+
+my &test-code = sub {
+    say 42;
+    note 'warning!';
+    say "After warning";
+};
+
+# Test code's output using exact match ('is')
+output-is   &test-code, "42\nwarning!\nAfter warning\n", 'testing output';
+stdout-is   &test-code, "42\nAfter warning\n",  'testing stdout';
+stderr-is   &test-code, "warning!\n", 'testing stderr';
+
+# Test code's output using regex ('like')
+output-like &test-code, /42.+warning.+After/, 'testing output (regex)';
+stdout-like &test-code, /42/, 'testing stdout (regex)';
+stderr-like &test-code, /^ "warning!\n" $/, 'testing stderr (regex)';
+
+# Test code's silentness
+no-output { my $a = 42 }, 'did not generate any output';
+no-stdout { my $a = 42 }, 'did not generate any output on STDOUT';
+no-stderr { my $a = 42 }, 'did not generate any output on STDERR';
+
+# Just capture code's output and do whatever you want with it
+is output-from( &test-code ), "42\nwarning!\nAfter warning\n";
+is stdout-from( &test-code ), "42\nAfter warning\n";
+is stderr-from( &test-code ), "warning!\n";
+=end code
+
+=head1 DESCRIPTION
+
+The C<Test::Output> distribution provides a number of test subroutines
+that allow one to capture the output (STDOUT / STDERR / or both) of
+the execution of a C<Callable> and evaluate that output for some
+criteria.
+
+=head1 SELECTIVE IMPORTING
+
+=begin code :lang<raku>
+use Test::Output <output-is>;  # only import "output-is"
+=end code
+
+By default all functions are exported.  But you can limit this to the
+functions you actually need by specifying the names in the C<use>
+statement.
+
+To prevent name collisions and/or import any subroutine with a more
+memorable name, one can use the "original-name:known-as" syntax.  A
+semi-colon in a specified string indicates the name by which the subroutine
+is known in this distribution, followed by the name with which it will be
+known in the lexical context in which the C<use> command is executed.
+
+=begin code :lang<raku>
+use Test::Output <output-is:ois>;  # import "output-is" as "oisp"
+ois { say "foo" }, "foo\n", 'output matched';
+=end code
+
+=head1 EXPORTED SUBROUTINES
+
+=head2 "is" tests
+
+=head3 output-is
+
+=begin code :lang<raku>
+output-is { say 42; note 43; say 44 }, "42\n43\n44\n",
+ 'Merged output from STDOUT/STDERR looks fine!';
+=end code
+
+Uses C<is> function from C<Test> module to test whether the combined
+STDERR/STDOUT output from the execution of a C<Callable> matches the
+given string.  Takes an B<optional> test description.
+
+=head3 stdout-is
+
+=begin code :lang<raku>
+stdout-is { say 42; note 43; say 44 }, "42\n44\n",
+  'STDOUT looks fine!';
+=end code
+
+Same as C<output-is>, except tests STDOUT only.
+
+=head3 stderr-is
+
+=begin code :lang<raku>
+stderr-is { say 42; note 43; say 44 }, "43\n",
+  'STDERR looks fine!';
+=end code
+
+Same as C<output-is>, except tests STDERR only.
+
+=head2 "like" tests
+
+=head3 output-like
+
+=begin code :lang<raku>
+output-like { say 42; note 43; say 44 }, /42 .+ 43 .+ 44/,
+  'Merged output from STDOUT/STDERR matches the regex!';
+=end code
+
+Uses C<like> function from C<Test> module to test whether the combined
+STDERR / STDOUT output from the execution of a C<Callable> matches the
+given C<Regex>. Takes an B<optional> test description.
+
+=head3 stdout-like
+
+=begin code :lang<raku>
+stdout-like { say 42; note 43; say 44 }, /42 \n 44/,
+  'STDOUT matches the regex!';
+=end code
+
+Same as C<output-like>, except tests STDOUT only.
+
+=head3 stderr-like
+
+=begin code :lang<raku>
+stderr-like { say 42; note 43; say 44 }, /^ 43\n $/,
+  'STDERR matches the regex!';
+=end code
+
+Same as C<output-like>, except tests STDERR only.
+
+=head2 Output Capture
+
+=head3 output-from
+
+=begin code :lang<raku>
+my $output = output-from { say 42; note 43; say 44 };
+say "Captured $output from our program!";
+
+is $output, "42\nwarning!\nAfter warning\n",
+  'captured merged STDOUT/STDERR look fine';
+=end code
+
+Captures and returns merged STDOUT / STDERR output from the execution
+of a given C<Callable>.
+
+=head3 stdout-from
+
+=begin code :lang<raku>
+my $stdout = stdout-from { say 42; note 43; say 44 };
+say "Captured $stdout from our program!";
+
+is $stdout, "42\nAfter warning\n",
+  'captured STDOUT looks fine';
+=end code
+
+Same as C<output-from>, except captures STDOUT only.
+
+=head3 stderr-from
+
+=begin code :lang<raku>
+my $stderr = stderr-from { say 42; note 43; say 44 };
+say "Captured $stderr from our program!";
+
+is $stderr, "warning\n",
+  'captured STDERR looks fine';
+=end code
+
+Same as <output-from>, except captures STDERR only.
+
+=head3 test-output-verbosity
+
+=begin code :lang<raku>
+    sub test-output-verbosity (Bool :$on, Bool :$off) returns Str;
+=end code
+
+=begin code :lang<raku>
+# turn verbosity on
+test-output-verbosity(:on);
+
+my $output = output-from { do-something-interactive() };
+# test output will now displayed during the test
+
+# turn verbosity off
+test-output-verbosity(:off);
+=end code
+
+Display the code's output while the test code is executed. This can be
+very useful for author tests that require you to enter input based on
+the output.
+
+You can switch verbosity on or off with the <:on> and <:off> named
+arguments.
+
+=head1 CAVEATS
+
+The C<Test::Output> logic operates by changing the dynamic variables
+C<$*OUT> and C<$*ERR>, which is what Raku's standard output functions
+use.  This logic does B<not> apply to any output generated by external
+programs using C<run> or C<shell>: they have their own way of capturing
+output.
+
+=head1 AUTHORS
+
+=item Zoffix Znet
+=item JJ Merelo
+=item Elizabeth Mattijsen
+
+Source can be located at: https://github.com/lizmat/Test-Output . Comments
+and Pull Requests are welcome.
+
+If you like this module, or what I’m doing more generally, committing to a
+L<small sponsorship|https://github.com/sponsors/lizmat/>  would mean a great
+deal to me!
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright 2016 - 2017 Zoffix Znet
+
+Copyright 2019 - 2022 JJ Merelo
+
+Copyright 2023 - 2024 The Raku Community
+
+Copyright 2025 Elizabeth Mattijsen
+
+This library is free software; you can redistribute it and/or modify it under the Artistic License 2.0.
+
+=end pod
+
+# vim: expandtab shiftwidth=4

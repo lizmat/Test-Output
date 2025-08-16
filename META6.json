@@ -1,15 +1,18 @@
 {
-  "auth": "zef:raku-community-modules",
+  "auth": "zef:lizmat",
   "authors": [
     "Zoffix Znet",
-    "JJ Merelo"
+    "JJ Merelo",
+    "Elizabeth Mattijsen"
   ],
-  "build-depends": [
-  ],
-  "depends": [
-    "Test"
-  ],
-  "description": "Test the output to STDOUT and STDERR your program generates",
+  "depends": {
+    "runtime": {
+      "requires": [
+        "Trap:ver<0.0.5+>:auth<zef:lizmat>"
+      ]
+    }
+  },
+  "description": "Test the output to STDOUT and STDERR your tests produce",
   "license": "Artistic-2.0",
   "name": "Test::Output",
   "provides": {
@@ -17,15 +20,16 @@
   },
   "raku": "6.d",
   "resources": [
-    "examples/output-test.t"
   ],
-  "source-url": "https://github.com/raku-community-modules/Test-Output.git",
   "support": {
+    "bugtracker": "https://github.com/raku-community-modules/Test-Output/issues",
+    "email": "liz@raku.rocks",
     "source": "git://github.com/raku-community-modules/Test-Output.git"
   },
   "tags": [
+    "TEST",
+    "STDOUT",
+    "STDERR"
   ],
-  "test-depends": [
-  ],
-  "version": "1.001006"
+  "version": "1.2"
 }

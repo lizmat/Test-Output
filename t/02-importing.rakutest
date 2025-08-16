@@ -1,0 +1,31 @@
+use Test;
+
+my constant @subs = <
+  no-output no-stderr no-stdout output-from output-is output-like
+  stderr-from stderr-is stderr-like stdout-from stdout-is stdout-like
+  test-output-verbosity
+>;
+
+plan @subs + 2;
+
+my $code;
+for @subs {
+    $code ~= qq:!c:to/CODE/;
+    {
+        use Test::Output '$_';
+        ok MY::<&$_>:exists, "Did '$_' get exported?";
+    }
+    CODE
+}
+
+$code ~= qq:!c:to/CODE/;
+{
+    use Test::Output <test-output-verbosity:tov>;
+    ok MY::<&tov>:exists, "Did 'common-start' get exported?";
+    is MY::<&tov>.name, 'test-output-verbosity', 'Was the original name ok';
+}
+CODE
+
+$code.EVAL;
+
+# vim: expandtab shiftwidth=4

@@ -1,3 +1,4 @@
-.precomp
-*.iml
-.idea
+.precomp/
+/Test-Output-*
+/releases/
+*.rakucov

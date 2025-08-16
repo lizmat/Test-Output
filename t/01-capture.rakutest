@@ -1,0 +1,51 @@
+use Test;
+use Test::Output;
+
+plan 21;
+
+sub test-code {
+    say 42;
+    note 'warning!';
+    say "After warning";
+};
+
+output-is   &test-code, "42\nwarning!\nAfter warning\n", 'testing output-is';
+output-like &test-code, /42.+warning.+After/, 'testing output-like';
+stdout-is   &test-code, "42\nAfter warning\n";
+stdout-like &test-code, /42/;
+stderr-is   &test-code, "warning!\n";
+stderr-like &test-code, /^ "warning!\n" $/;
+
+is output-from( &test-code ), "42\nwarning!\nAfter warning\n",
+    'output-from works';
+is stdout-from( &test-code ), "42\nAfter warning\n", 'stdout-from works';
+is stderr-from( &test-code ), "warning!\n", 'stderr-from works';
+
+test-output-verbosity(:on);
+output-is   &test-code, "42\nwarning!\nAfter warning\n", 'verbosity testing output-is';
+
+output-like &test-code, /42.+warning '!' .+ After/, 'verbosity testing output-like';
+
+stdout-is   &test-code, "42\nAfter warning\n";
+
+stdout-like &test-code, /42 .+ warning/;
+
+test-output-verbosity(:off);
+stderr-is   &test-code, "warning!\n";
+
+stderr-like &test-code, /^ "warning!\n" $/;
+
+is output-from( &test-code ), "42\nwarning!\nAfter warning\n",
+        'verbosity output-from works';
+
+is stdout-from( &test-code ), "42\nAfter warning\n", 'stdout-from works';
+
+is stderr-from( &test-code ), "warning!\n", 'stderr-from works';
+
+sub silent-code { my $a = 42 }
+
+no-output &silent-code, 'No output';
+no-stdout &silent-code, 'No output on STDOUT';
+no-stderr &silent-code, 'No output on STDERR';
+
+# vim: expandtab shiftwidth=4

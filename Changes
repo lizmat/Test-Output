@@ -1,12 +1,25 @@
 Revision History for 'Test::Output' Raku Distribution
 
 {{$NEXT}}
+    - Distribution adopted by Elizabeth Mattijsen
+    - Complete re-implementation based on the Trap module
+    - Add "no-output", "no-stdout" and "no-stderr" subroutines
+      to make it easier to check for no unexpected output
+    - Allow for selective importing / renaming
+    - Make test functions "test assertions" for better feedback
+      on failing tests
+    - Add more tests
+    - Add coverage testing (100%)
+    - Modernized documentation
+    - Cleanup of unwanted graphics elements
+    - Add CI badge for each OS
+    - Modernize META and add tags
 
 1.001006  2023-11-09T11:36:06+01:00
-  - First release over Fez
+    - First release over Fez
 
 1.001004  2022-08-26
-  - Fix broken windows tests
+    - Fix broken windows tests
 
 1.001001  2016-01-07
-  - First version released on an unsuspecting world
+    - First version released on an unsuspecting world
