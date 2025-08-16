@@ -23,11 +23,10 @@
   "raku": "6.d",
   "resources": [
   ],
-  "source-url": "https://github.com/lizmat/Test-Output.git",
   "support": {
-    "bugtracker": "https://github.com/raku-community-modules/Test-Output/issues",
+    "bugtracker": "https://github.com/lizmat/Test-Output/issues",
     "email": "liz@raku.rocks",
-    "source": "git://github.com/raku-community-modules/Test-Output.git"
+    "source": "git://github.com/lizmat/Test-Output.git"
   },
   "tags": [
     "TEST",
